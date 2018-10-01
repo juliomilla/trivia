@@ -1,5 +1,8 @@
 import {Player} from './player';
 
+/**
+ * Game class
+ */
 export class Game {
 
   private players: Array<Player> = [];
@@ -28,25 +31,46 @@ export class Game {
     }
   }
 
+  /**
+  * Adds questions to the game
+  * @param type   Type of the question
+  * @param index  Number of the question
+  * @returns      A string with the question type and number  
+  */
   private createQuestion(type: string, index: number): string {
     return type + " Question " + index;
   }
 
-  public addPlayer(name: string): boolean {
+  /**
+  * Adds a player to the game
+  * @param name   Name of the player
+  */
+  public addPlayer(name: string) {
     this.players.push(new Player(name));
     console.log(name + " was added");
     console.log("They are player number " + this.howManyPlayers());
-    return true;
   }
 
+  /**
+  * Calculates the amount of players in the current game
+  * @returns   Number of players in the game
+  */
   private howManyPlayers(): number {
     return this.players.length;
   }
 
+  /**
+  * Fetches the current player
+  * @returns   Current player
+  */
   private getCurrentPlayer(): Player {
     return this.players[this.currentPlayer];
   }
 
+  /**
+  * Moves the player to a new position
+  * @param positions  Number of positions to move
+  */
   private advanceInBoard(positions: number) {
     let player = this.getCurrentPlayer();
     let newPosition = player.position + positions;
@@ -60,23 +84,40 @@ export class Game {
     console.log(player.name + "'s new location is " + player.position);
   }
 
+  /**
+  * Sets the next player to play the next turn
+  */
   private nextPlayer() {
     this.currentPlayer += 1;
     if (this.currentPlayer == this.howManyPlayers())
       this.currentPlayer = 0;
   }
 
+  /**
+  * Checks if a roll is an odd number
+  * @param roll   Random roll number
+  * @returns       If the number is an odd number
+  */
   private isOddRoll(roll: number): boolean {
     return roll % 2 != 0;
   }
 
+  /**
+  * Checks if a users position has reached the end of the board
+  * @param position   Position number
+  * @returns           If the user has reached the end of the board
+  */
   private currentPlayerReachedEndOfBoard(position: number): boolean {
     let lastBoardPosition = 11;
     return position > lastBoardPosition;
   }
 
-  // Runs a new turn and determines if a winner has been found or if the game should continue
-  public newTurn(roll: number) {
+  /**
+  * Plays a new turn and determines if the game should continue
+  * @param roll   Random roll number
+  * @returns       If the game should continue
+  */
+  public newTurn(roll: number): boolean {
     // Gets the current player
     let player = this.getCurrentPlayer();
     let isCorrectAnswer = false;
@@ -108,6 +149,9 @@ export class Game {
     return true;
   }
 
+  /**
+  * Poses a question of the appropriate category
+  */
   private askQuestion(): void {
     let category = this.currentCategory();
     console.log("The category is " + this.currentCategory());
@@ -128,6 +172,9 @@ export class Game {
     }
   }
 
+  /**
+  * Processes an answer. If the user rolls 7 it means that the answer was wrong
+  */
   private processAnswer(): void {
     let wrongAnswerNumber = 7;
     let player = this.getCurrentPlayer();
@@ -144,6 +191,10 @@ export class Game {
     }
   }
 
+  /**
+  * Retrieves the current category based on a users position
+  * @returns  Current category
+  */
   private currentCategory(): string {
     switch (this.getCurrentPlayer().position % 4) {
       case 0:
@@ -161,6 +212,10 @@ export class Game {
     }
   }
 
+  /**
+  * Checks if the player has reached 6 coins and the game has finished
+  * @returns  If the game has finished
+  */
   private didPlayerWin(): boolean {
     return this.getCurrentPlayer().purse == 6
   }
