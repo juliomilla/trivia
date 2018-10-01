@@ -20,7 +20,6 @@ export class Game {
   private rockCategory: string = "Rock"
 
   private boardSize: number = 12;
-  private lastBoardPosition: number = 11;
 
   constructor() {
     let categorySize = 50;
@@ -53,12 +52,12 @@ export class Game {
   }
 
   private getCurrentPlayer(): Player {
-    return this.players[this.currentPlayer]
+    return this.players[this.currentPlayer];
   }
 
   private advanceInBoard(positions: number) {
     this.places[this.currentPlayer] = this.places[this.currentPlayer] + positions;
-    if (this.places[this.currentPlayer] > this.lastBoardPosition) {
+    if (this.currentPlayerReachedEndOfBoard()) {
       this.places[this.currentPlayer] = this.places[this.currentPlayer] - this.boardSize;
     }
   }
@@ -69,15 +68,25 @@ export class Game {
       this.currentPlayer = 0;
   }
 
-  public roll(roll: number) {
-    let board = 12;
-    let lastBoardPosition = 11;
+  private currentPlayerInPenaltyBox(): boolean {
+    return this.inPenaltyBox[this.currentPlayer];
+  }
 
+  private isOddRoll(roll: number): boolean {
+    return roll % 2 != 0;
+  }
+
+  private currentPlayerReachedEndOfBoard(): boolean {
+    let lastBoardPosition = 11;
+    return this.places[this.currentPlayer] > lastBoardPosition;
+  }
+
+  public roll(roll: number) {
     console.log(this.getCurrentPlayer().name + " is the current player");
     console.log("They have rolled a " + roll);
 
-    if (this.inPenaltyBox[this.currentPlayer]) {
-      if (roll % 2 != 0) {
+    if (this.currentPlayerInPenaltyBox()) {
+      if (this.isOddRoll(roll)) {
         this.isGettingOutOfPenaltyBox = true;
 
         console.log(this.getCurrentPlayer().name + " is getting out of the penalty box");
@@ -148,7 +157,7 @@ export class Game {
   }
 
   public wasCorrectlyAnswered(): boolean {
-    if (this.inPenaltyBox[this.currentPlayer]) {
+    if (this.currentPlayerInPenaltyBox()) {
         if (this.isGettingOutOfPenaltyBox) {
           console.log('Answer was correct!!!!');
           this.purses[this.currentPlayer] += 1;
