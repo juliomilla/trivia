@@ -32,6 +32,14 @@ export class Game {
   }
 
   /**
+  * Retrieves the size of the board
+  * @returns  Size of the board
+  */
+  get getBoardSize(): number {
+    return this.boardSize;
+  }
+
+  /**
   * Adds questions to the game
   * @param type   Type of the question
   * @param index  Number of the question
@@ -55,7 +63,7 @@ export class Game {
   * Calculates the amount of players in the current game
   * @returns   Number of players in the game
   */
-  private howManyPlayers(): number {
+  public howManyPlayers(): number {
     return this.players.length;
   }
 
@@ -63,7 +71,7 @@ export class Game {
   * Fetches the current player
   * @returns   Current player
   */
-  private getCurrentPlayer(): Player {
+  public getCurrentPlayer(): Player {
     return this.players[this.currentPlayer];
   }
 
@@ -141,7 +149,7 @@ export class Game {
     this.askQuestion();
     this.processAnswer();
 
-    if (this.didPlayerWin())
+    if (this.didGameFinish())
       return false;
     else {
       this.nextPlayer();
@@ -195,20 +203,16 @@ export class Game {
   * Retrieves the current category based on a users position
   * @returns  Current category
   */
-  private currentCategory(): string {
+  public currentCategory(): string {
     switch (this.getCurrentPlayer().position % 4) {
       case 0:
         return this.popCategory;
-        break;
       case 1:
         return this.scienceCategory;
-        break;
       case 2:
         return this.sportsCategory;
-        break;
       default:
         return this.rockCategory;
-        break;
     }
   }
 
@@ -216,7 +220,7 @@ export class Game {
   * Checks if the player has reached 6 coins and the game has finished
   * @returns  If the game has finished
   */
-  private didPlayerWin(): boolean {
+  public didGameFinish(): boolean {
     return this.getCurrentPlayer().purse == 6
   }
 }
