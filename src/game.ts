@@ -14,16 +14,21 @@ export class Game {
   private sportsQuestions: Array<string> = [];
   private rockQuestions: Array<string> = [];
 
+  private popCategory: string = "Pop";
+  private scienceCategory: string = "Science";
+  private sportsCategory: string = "Sports";
+  private rockCategory: string = "Rock"
+
   private boardSize: number = 12;
   private lastBoardPosition: number = 11;
 
   constructor() {
     let categorySize = 50;
     for (let i = 0; i < categorySize; i++) {
-      this.popQuestions.push(this.createQuestion("Pop", i));
-      this.scienceQuestions.push(this.createQuestion("Science", i));
-      this.sportsQuestions.push(this.createQuestion("Sports", i));
-      this.rockQuestions.push(this.createQuestion("Rock", i));
+      this.popQuestions.push(this.createQuestion(this.popCategory, i));
+      this.scienceQuestions.push(this.createQuestion(this.scienceCategory, i));
+      this.sportsQuestions.push(this.createQuestion(this.sportsCategory, i));
+      this.rockQuestions.push(this.createQuestion(this.rockCategory, i));
     }
   }
 
@@ -97,41 +102,36 @@ export class Game {
   }
 
   private askQuestion(): void {
-    if (this.currentCategory() == 'Pop')
+    if (this.currentCategory() == this.popCategory)
       console.log(this.popQuestions.shift());
-    if (this.currentCategory() == 'Science')
+    if (this.currentCategory() == this.scienceCategory)
       console.log(this.scienceQuestions.shift());
-    if (this.currentCategory() == 'Sports')
+    if (this.currentCategory() == this.sportsCategory)
       console.log(this.sportsQuestions.shift());
-    if (this.currentCategory() == 'Rock')
+    if (this.currentCategory() == this.rockCategory)
       console.log(this.rockQuestions.shift());
   }
 
   private currentCategory(): string {
-    let popCategory = "Pop";
-    let scienceCategory = "Science";
-    let sportCategory = "Sports";
-    let rockCategory = "Rock";
-
     if (this.places[this.currentPlayer] == 0)
-      return popCategory;
+      return this.popCategory;
     if (this.places[this.currentPlayer] == 4)
-      return popCategory;
+      return this.popCategory;
     if (this.places[this.currentPlayer] == 8)
-      return popCategory;
+      return this.popCategory;
     if (this.places[this.currentPlayer] == 1)
-      return popCategory;
+      return this.popCategory;
     if (this.places[this.currentPlayer] == 5)
-      return scienceCategory;
+      return this.scienceCategory;
     if (this.places[this.currentPlayer] == 9)
-      return scienceCategory;
+      return this.scienceCategory;
     if (this.places[this.currentPlayer] == 2)
-      return sportCategory;
+      return this.sportsCategory;
     if (this.places[this.currentPlayer] == 6)
-      return sportCategory;
+      return this.sportsCategory;
     if (this.places[this.currentPlayer] == 10)
-      return sportCategory;
-    return rockCategory;
+      return this.sportsCategory;
+    return this.rockCategory;
   }
 
   private didPlayerWin(): boolean {
