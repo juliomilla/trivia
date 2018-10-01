@@ -8,14 +8,17 @@ export class GameRunner {
         game.addPlayer("Sue");
 
         let notAWinner;
-        do {
+        let wrongAnswer = 7;
 
-            game.roll(Math.floor(Math.random() * 6) + 1);
+        do {
+            console.log("------------");
+            let gameDice = Math.floor(Math.random() * 6) + 1;
+            game.roll(gameDice);
         
-            if (Math.floor(Math.random() * 10) == 7) {
-            notAWinner = game.wrongAnswer();
+            if (Math.floor(Math.random() * 10) == wrongAnswer) {
+                notAWinner = game.wrongAnswer();
             } else {
-            notAWinner = game.wasCorrectlyAnswered();
+                notAWinner = game.wasCorrectlyAnswered();
             }
         
         } while (notAWinner);
