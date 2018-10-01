@@ -3,9 +3,6 @@ import {Player} from './player';
 export class Game {
 
   private players: Array<Player> = [];
-  private places: Array<number> = [];
-  private purses: Array<number> = [];
-  private inPenaltyBox: Array<boolean> = [];
   private currentPlayer: number = 0;
   private isGettingOutOfPenaltyBox: boolean = false;
 
@@ -37,13 +34,8 @@ export class Game {
 
   public addPlayer(name: string): boolean {
     this.players.push(new Player(name));
-    this.places[this.howManyPlayers() - 1] = 0;
-    this.purses[this.howManyPlayers() - 1] = 0;
-    this.inPenaltyBox[this.howManyPlayers() - 1] = false;
-
     console.log(name + " was added");
     console.log("They are player number " + this.howManyPlayers());
-
     return true;
   }
 
@@ -56,10 +48,16 @@ export class Game {
   }
 
   private advanceInBoard(positions: number) {
-    this.places[this.currentPlayer] = this.places[this.currentPlayer] + positions;
-    if (this.currentPlayerReachedEndOfBoard()) {
-      this.places[this.currentPlayer] = this.places[this.currentPlayer] - this.boardSize;
+    let player = this.getCurrentPlayer();
+    let newPosition = player.position + positions;
+
+
+    if (this.currentPlayerReachedEndOfBoard(newPosition)) {
+      player.position = newPosition - this.boardSize;
+    } else {
+      player.position = newPosition;
     }
+    console.log(player.name + "'s new location is " + player.position);
   }
 
   private nextPlayer() {
@@ -68,122 +66,102 @@ export class Game {
       this.currentPlayer = 0;
   }
 
-  private currentPlayerInPenaltyBox(): boolean {
-    return this.inPenaltyBox[this.currentPlayer];
-  }
-
   private isOddRoll(roll: number): boolean {
     return roll % 2 != 0;
   }
 
-  private currentPlayerReachedEndOfBoard(): boolean {
+  private currentPlayerReachedEndOfBoard(position: number): boolean {
     let lastBoardPosition = 11;
-    return this.places[this.currentPlayer] > lastBoardPosition;
+    return position > lastBoardPosition;
   }
 
-  public roll(roll: number) {
+  // Runs a new turn and determines if a winner has been found or if the game should continue
+  public newTurn(roll: number) {
+    // Gets the current player
+    let player = this.getCurrentPlayer();
+    let isCorrectAnswer = false;
     console.log(this.getCurrentPlayer().name + " is the current player");
     console.log("They have rolled a " + roll);
 
-    if (this.currentPlayerInPenaltyBox()) {
+    // If player is in the penalty box and rolls an odd number take them out and advance
+    if (player.inPenaltyBox) {
       if (this.isOddRoll(roll)) {
-        this.isGettingOutOfPenaltyBox = true;
-
-        console.log(this.getCurrentPlayer().name + " is getting out of the penalty box");
-
-        this.advanceInBoard(roll)
-
-        console.log(this.getCurrentPlayer().name + "'s new location is " + this.places[this.currentPlayer]);
-        console.log("The category is " + this.currentCategory());
-        this.askQuestion();
-      } else {
-        console.log(this.getCurrentPlayer().name + " is not getting out of the penalty box");
-        this.isGettingOutOfPenaltyBox = false;
+        player.inPenaltyBox = false;
+        console.log(player.name + " is getting out of the penalty box");
       }
-    } else {
-
-      this.advanceInBoard(roll)
-
-      console.log(this.getCurrentPlayer().name + "'s new location is " + this.places[this.currentPlayer]);
-      console.log("The category is " + this.currentCategory());
-      this.askQuestion();
+      else {
+        // if the player didn't roll an odd number continue to next round
+        console.log(player.name + " is not getting out of the penalty box");
+        this.nextPlayer();
+        return true;
+      }
     }
-  }
+    this.advanceInBoard(roll);
+    this.askQuestion();
+    this.processAnswer();
 
-  private askQuestion(): void {
-    if (this.currentCategory() == this.popCategory)
-      console.log(this.popQuestions.shift());
-    if (this.currentCategory() == this.scienceCategory)
-      console.log(this.scienceQuestions.shift());
-    if (this.currentCategory() == this.sportsCategory)
-      console.log(this.sportsQuestions.shift());
-    if (this.currentCategory() == this.rockCategory)
-      console.log(this.rockQuestions.shift());
-  }
-
-  private currentCategory(): string {
-    if (this.places[this.currentPlayer] == 0)
-      return this.popCategory;
-    if (this.places[this.currentPlayer] == 4)
-      return this.popCategory;
-    if (this.places[this.currentPlayer] == 8)
-      return this.popCategory;
-    if (this.places[this.currentPlayer] == 1)
-      return this.popCategory;
-    if (this.places[this.currentPlayer] == 5)
-      return this.scienceCategory;
-    if (this.places[this.currentPlayer] == 9)
-      return this.scienceCategory;
-    if (this.places[this.currentPlayer] == 2)
-      return this.sportsCategory;
-    if (this.places[this.currentPlayer] == 6)
-      return this.sportsCategory;
-    if (this.places[this.currentPlayer] == 10)
-      return this.sportsCategory;
-    return this.rockCategory;
-  }
-
-  private didPlayerWin(): boolean {
-    return !(this.purses[this.currentPlayer] == 6)
-  }
-
-  public wrongAnswer(): boolean {
-    console.log('Question was incorrectly answered');
-    console.log(this.getCurrentPlayer().name + " was sent to the penalty box");
-    this.inPenaltyBox[this.currentPlayer] = true;
-
-    this.nextPlayer();
+    if (this.didPlayerWin())
+      return false;
+    else {
+      this.nextPlayer();
+    }
     return true;
   }
 
-  public wasCorrectlyAnswered(): boolean {
-    if (this.currentPlayerInPenaltyBox()) {
-        if (this.isGettingOutOfPenaltyBox) {
-          console.log('Answer was correct!!!!');
-          this.purses[this.currentPlayer] += 1;
-          console.log(this.getCurrentPlayer().name + " now has " +
-          this.getCurrentPlayer().purse + " Gold Coins.");
-  
-          var winner = this.didPlayerWin();
+  private askQuestion(): void {
+    let category = this.currentCategory();
+    console.log("The category is " + this.currentCategory());
 
-          this.nextPlayer();
-  
-          return winner;
-        } else {
-          this.nextPlayer();
-          return true;
-        }
-    } else {
-      console.log("Answer was correct!!!!");
-
-      this.purses[this.currentPlayer] += 1;
-      console.log(this.getCurrentPlayer().name + " now has " +
-          this.purses[this.currentPlayer] + " Gold Coins.");
-
-      var winner = this.didPlayerWin();
-
-      this.nextPlayer();
-      return winner;
+    switch (category) {
+      case this.popCategory:
+        console.log(this.popQuestions.shift());
+        break;
+      case this.scienceCategory:
+        console.log(this.scienceQuestions.shift());
+        break;
+      case this.sportsCategory:
+        console.log(this.sportsQuestions.shift());
+        break;
+      case this.rockCategory:
+        console.log(this.rockQuestions.shift());
+        break;
     }
+  }
+
+  private processAnswer(): void {
+    let wrongAnswerNumber = 7;
+    let player = this.getCurrentPlayer();
+
+    // if the random answer equals 7 then it is a wrong answer
+    if (Math.floor(Math.random() * 10) == wrongAnswerNumber) {
+      player.inPenaltyBox = true;
+      console.log('Question was incorrectly answered');
+      console.log(player.name + " was sent to the penalty box");
+    } else {
+      player.incrementPurse();
+      console.log('Answer was correct!!!!');
+      console.log(player.name + " now has " + player.purse + " Gold Coins.");
+    }
+  }
+
+  private currentCategory(): string {
+    switch (this.getCurrentPlayer().position % 4) {
+      case 0:
+        return this.popCategory;
+        break;
+      case 1:
+        return this.scienceCategory;
+        break;
+      case 2:
+        return this.sportsCategory;
+        break;
+      default:
+        return this.rockCategory;
+        break;
+    }
+  }
+
+  private didPlayerWin(): boolean {
+    return this.getCurrentPlayer().purse == 6
   }
 }
